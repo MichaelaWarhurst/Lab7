@@ -52,7 +52,20 @@ function Level(plan) {
     // Push the entire row onto the array of rows.
     this.grid.push(gridLine);
   }
+  this.player = this.actors.filter(function(actor){
+    return actor.type == "player";
+  })[0];
 }
+
+function Coin(pos) {
+  this.basePos = this.pos = pos.plus(newVector(0.2, 0.1));
+  this.size = new Vector(0.6, 0.6);
+  this.wobble = Math.random() * Math.PI * 2;
+  //speed if you want projectile
+}
+
+Coin.prototype.type = 'coin';
+//Player.prototype.type = //needs a type or else non of the functions will work.
 
 function Vector(x, y) {
   this.x = x; this.y = y;
@@ -123,24 +136,31 @@ DOMDisplay.prototype.drawBackground = function() {
   return table;
 };
 
-// Draw the player agent
-DOMDisplay.prototype.drawPlayer = function() {
+// Draw the player agent //draw actors instead
+//DOMDisplay.prototype.drawPlayer = function() {
+DOMDisplay.prototype.drawActors = function() {
   // Create a new container div for actor dom elements
   var wrap = elt("div");
 
-  var actor = this.level.player;
+  //var actor = this.level.player;
+  //instead go through each actor
+  this.level.actors.forEach(function(actor){
+
   var rect = wrap.appendChild(elt("div", "actor " + actor.type));
-  rect.style.width = actor.size.x * scale + "px";
-  rect.style.height = actor.size.y * scale + "px";
-  rect.style.left = actor.pos.x * scale + "px";
-  rect.style.top = actor.pos.y * scale + "px";
+
+    rect.style.width = actor.size.x * scale + "px";
+    rect.style.height = actor.size.y * scale + "px";
+    rect.style.left = actor.pos.x * scale + "px";
+    rect.style.top = actor.pos.y * scale + "px";
+  });
   return wrap;
 };
 
 DOMDisplay.prototype.drawFrame = function() {
   if (this.actorLayer)
     this.wrap.removeChild(this.actorLayer);
-  this.actorLayer = this.wrap.appendChild(this.drawPlayer());
+  //this.actorLayer = this.wrap.appendChild(this.drawPlayer());
+  this.actorLayer = this.wrap.appendChild(this.drawActors());
   this.scrollPlayerIntoView();
 };
 
@@ -196,7 +216,17 @@ Level.prototype.obstacleAt = function(pos, size){
 
 };
 
-
+Level.prototype.actorAt = function(actor) {
+  for (var i=0; i<this.actors.length; i++) {
+      var other = this.actors[i];
+      if (other != actor &&
+          actor.pos.x + actor.size.x > other.pos.x &&
+          actor.pos.x< other.pos.x + other.size.x &&
+          actor.pos.y + actor.size.y > other.pos.y &&
+          actor.pos.y < other.pos.y + other.size.y)
+          return other;
+  }
+};
 // Update simulation each step based on keys & step size
 Level.prototype.animate = function(step, keys) {
 
