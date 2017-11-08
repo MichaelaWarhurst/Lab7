@@ -2,7 +2,10 @@
 //object
 var actorChars = {
   '@': Player,
-  'o': Coin
+  'o': Coin,
+  ///creating a new actor?
+  's': Something
+  ///
 
 };
 
@@ -15,7 +18,7 @@ function Level(plan) {
 
   // Store the individual tiles in our own, separate array
   this.grid = [];
-  this.actor = [];//want to start keeping track of all the actors//anything active in game
+  this.actors = [];//want to start keeping track of all the actors//anything active in game
 
   // Loop through each row in the plan, creating an array in our grid
   for (var y = 0; y < this.height; y++) {
@@ -52,13 +55,13 @@ function Level(plan) {
     // Push the entire row onto the array of rows.
     this.grid.push(gridLine);
   }
-  this.player = this.actors.filter(function(actor){
+  this.player = this.actors.filter(function(actor) {
     return actor.type == "player";
   })[0];
 }
 
 function Coin(pos) {
-  this.basePos = this.pos = pos.plus(newVector(0.2, 0.1));
+  this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
   this.size = new Vector(0.6, 0.6);
   this.wobble = Math.random() * Math.PI * 2;
   //speed if you want projectile
@@ -66,6 +69,17 @@ function Coin(pos) {
 
 Coin.prototype.type = 'coin';
 //Player.prototype.type = //needs a type or else non of the functions will work.
+
+/////////me
+function Something(pos, ch) {
+  this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
+  this.size = new Vector(0.6, 0.6);
+  this.wobble = Math.random() * Math.PI * 2;
+}
+Something.prototype.type = "Something";
+
+
+///
 
 function Vector(x, y) {
   this.x = x; this.y = y;
@@ -252,6 +266,16 @@ Coin.prototype.act = function(step) {
 
 };
 
+/////also prototype
+Something.prototype.act = function(step) {
+  this.wobble += step * wobbleSpeed;
+  var wobblePos = Math.cos(this.wobble) * wobbleDist;
+  this.pos = this.basePos.plus(new Vector(0, wobblePos));
+
+};
+
+/////////////////
+
 var maxStep = 0.05;
 
 var playerXSpeed = 8;
@@ -315,11 +339,20 @@ Player.prototype.act = function(step, level, keys) {
 
 };
 
-Level.protoype.playerTouched = fuunction(type, actor) {
+Level.prototype.playerTouched = function(type, actor) {
   if (type == 'coin'){
-    this.actors = this.actor.filter(function(other))
+    this.actors = this.actors.filter(function(other) {
       return other != actor;
-  });
+    });
+  }
+};
+//////something prototype
+Something.prototype.act = function(type, actor) {
+  if (type == 'Something'){
+    this.actors = this.actors.filter(function(other) {
+      return other != actor;
+    });
+  }
 };
 
 
