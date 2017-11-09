@@ -1,4 +1,6 @@
-//actor is anything the moves
+
+
+//Actor is anything the moves in the game
 //object
 var actorChars = {
   '@': Player,
@@ -60,6 +62,7 @@ function Level(plan) {
   })[0];
 }
 
+//constructor
 function Coin(pos) {
   this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
   this.size = new Vector(0.6, 0.6);
@@ -73,8 +76,9 @@ Coin.prototype.type = 'coin';
 /////////me
 function Something(pos, ch) {
   this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
-  this.size = new Vector(0.6, 0.6);
-  this.wobble = Math.random() * Math.PI * 2;
+  this.size = new Vector(0.7, 2.5);
+  //this.wobble = Math.random() * Math.PI * 2;
+  this.wobble = Math.random() / 2;
 }
 Something.prototype.type = "Something";
 
@@ -259,6 +263,7 @@ Level.prototype.animate = function(step, keys) {
 
 var wobbleSpeed = 8;
 var wobbleDist = 0.07;
+
 Coin.prototype.act = function(step) {
   this.wobble += step * wobbleSpeed;
   var wobblePos = Math.sin(this.wobble) * wobbleDist;
@@ -268,6 +273,9 @@ Coin.prototype.act = function(step) {
 
 /////also prototype
 Something.prototype.act = function(step) {
+  var wobbleDist = 4.07;
+  var wobbleSpeed = 2;
+
   this.wobble += step * wobbleSpeed;
   var wobblePos = Math.cos(this.wobble) * wobbleDist;
   this.pos = this.basePos.plus(new Vector(0, wobblePos));
@@ -340,20 +348,31 @@ Player.prototype.act = function(step, level, keys) {
 };
 
 Level.prototype.playerTouched = function(type, actor) {
-  if (type == 'coin'){
+  if (type == 'coin' || type == 'Something'){
     this.actors = this.actors.filter(function(other) {
       return other != actor;
     });
   }
 };
-//////something prototype
-Something.prototype.act = function(type, actor) {
-  if (type == 'Something'){
+
+
+Level.prototype.playerTouched = function(type, actor) {
+  if (type == "lava" && this.status == null) {
+    this.status = "lost";
+    this.finishDelay = 1;
+  } else if (type == "coin") {
     this.actors = this.actors.filter(function(other) {
       return other != actor;
     });
+    if (!this.actors.some(function(actor) {
+      return actor.type == "coin";
+    })) {
+      this.status = "won";
+      this.finishDelay = 1;
+    }
   }
 };
+
 
 
 
